@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Pointer Test</title>
+    <style>
+        /* CSS */
+        input[type="date"] {
+            cursor: pointer; /* Add cursor pointer */
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer; /* Add cursor pointer to the calendar icon */
+            pointer-events: auto; /* Ensure pointer events are enabled for the icon */
+        }
+    </style>
+</head>
+<body>
+
+<!-- HTML -->
+<form>
+    <input type="date" id="expense-date" placeholder="Expense Date" autocomplete="on" required>
+</form>
+
+<script>
+    // JavaScript (if needed)
+</script>
+
+</body>
+</html>

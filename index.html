@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datepicker.js/dist/datepicker.min.css"> <!-- Add this line -->
+    <script src="https://cdn.jsdelivr.net/npm/datepicker.js"></script> <!-- Add this line -->
+</head>
+<body>
+<div class="tabs">
+    <button class="tab-button active" onclick="showTab(event, 'Expenses')">Expenses</button>
+    <button class="tab-button" onclick="showTab(event, 'Graph')">Graph</button>
+    <button class="tab-button" onclick="showTab(event, 'Monthly')">Monthly Expenses</button>
+</div>
+
+<div id="Expenses" class="tab-content">
+    <ul id="expense-list"></ul>
+    <div class="container">
+        <header>
+            <h1>Expense Tracker</h1>
+            <div class="total-expense">Total: <span id="total-amount">0 </span>Rs</div>
+        </header>
+        <form id="expense-form">
+            <input type="text" id="expense-name" placeholder="Expense Name" autocomplete="off" required>
+            <input type="number" id="expense-amount" placeholder="Amount" required>
+            <input type="date" id="expense-date" placeholder="Expense Date" autocomplete="off" required>
+            <button type="submit">Add Expense</button>
+        </form>
+
+    </div>
+</div>
+
+<div id="Graph" class="tab-content" style="display:none;">
+    <canvas id="expenseChart"></canvas>
+</div>
+
+<div id="Monthly" class="tab-content" style="display:none;">
+    <div id="monthly-expenses">Total Monthly: <span id="total-monthly">0</span> Rs</div>
+</div>
+
+<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Your JavaScript code goes here
+</script>
+</body>
+</html>
