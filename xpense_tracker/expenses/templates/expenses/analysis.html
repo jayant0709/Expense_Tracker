@@ -1,0 +1,451 @@
+{% extends "expenses/base.html" %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+
+
+<h1 style="text-align: center;">Dive Into Your Spending Habits: Customize Your Date Range</h1>
+<form action="{% url 'analysis_page' %}" method="GET">
+    <label for="start_date">Start Date:</label>
+    <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+
+    <label for="end_date">End Date:</label>
+    <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+
+    <input type="submit" value="Apply">
+</form>
+<button id="downloadPdfBtn">Download Report</button>
+<div class="chart-section">
+    <canvas id="expenseChart" style="max-width: 500px; max-height: 400px;"></canvas>
+</div>
+<div class="chart-container">
+    <canvas id="myChart" width="400" height="400"></canvas>
+</div>
+
+
+
+
+<div class="analysis-table">
+    <div id="table-title">
+        <table>
+            <tr> Report Analysis </tr>
+        </table>
+    </div>
+    <div class="analysis-table">
+        <table>
+            <tr>
+                <td>Average Expense Of Total Days:</td>
+                <td>{{ average_expense }}</td>
+            </tr>
+            <tr>
+                <td>Daily Average Spending:</td>
+                <td>{{ daily_average_expense }}</td>
+            </tr>
+            <tr>
+                <td>Maxumum Expense:</td>
+                <td>{{ max_expense }}</td>
+            </tr>
+            <tr>
+                <td>Maximum Expense Name:</td>
+                <td>{{ max_expense_name }}</td>
+            </tr>
+            <tr>
+                <td>Maximum Expense Day:</td>
+                <td>{{ max_expense_day }}</td>
+            </tr>
+            <!-- <tr>
+                <td>Maximum Expense Category:</td>
+                <td>{{ max_expense_category }}</td>
+            </tr> -->
+            
+            <tr>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+
+<script>
+
+    window.jsPDF = window.jspdf.jsPDF;
+
+    function downloadPdf() {
+        var doc = new jsPDF();
+    
+        // Set font size and style
+        doc.setFontSize(22);
+        doc.setFont("helvetica", "bold");
+    
+        // Add title to the PDF
+        doc.text("Report Analysis", 20, 30);
+    
+        // Set font size for the rest of the document
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "normal");
+    
+        // Add content to the PDF
+        doc.text("Average Expense Of Total Days: {{ average_expense }}", 20, 50);
+        doc.text("Daily Average Spending: {{ daily_average_expense }}", 20, 70);
+        doc.text("Maximum Expense: {{ max_expense }}", 20, 90);
+        doc.text("Maximum Expense Name: {{ max_expense_name }}", 20, 110);
+        doc.text("Maximum Expense Day: {{ max_expense_day }}", 20, 130);
+    
+        // Capture the first chart as an image
+        html2canvas(document.getElementById("expenseChart")).then(function(canvas) {
+            var imgData = canvas.toDataURL('image/png');
+            doc.addImage(imgData, 'PNG', 30, 150, 120, 80);  // Adjust these parameters to position the image correctly on the PDF
+    
+            // Capture the second chart as an image
+            html2canvas(document.getElementById("myChart")).then(function(canvas) {
+                var imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', 50, 220, 80, 80);  // Adjust these parameters to position the image correctly on the PDF
+    
+                // Save the PDF
+                doc.save("report.pdf");
+            });
+        });
+    }
+    
+  
+    
+
+
+    // Attach event listener to the button
+    document.getElementById("downloadPdfBtn").addEventListener("click", downloadPdf);
+</script>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-piechart-outlabels"></script>
+
+<script>
+    fetch('{% url "expenses_data" %}')
+    .then(response => response.json())
+    .then(data => {
+        var ctx = document.getElementById('myChart').getContext('2d');
+
+        var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Expenses',
+                    data: data.data,
+                    backgroundColor: [
+                    "rgba(255, 99, 132, 0.8)",
+                    "rgba(54, 162, 235, 0.8)",
+                    "rgba(255, 206, 86, 0.8)",
+                    "rgba(75, 192, 192, 0.8)",
+                    "rgba(153, 102, 255, 0.8)",
+                    "rgba(255, 159, 64, 0.8)",
+                    "rgba(0, 255, 255, 0.8)",    // Cyan
+                    "rgba(255, 192, 203, 0.8)",  // Pink
+                    "rgba(255, 0, 0, 0.8)",      // Bright Red
+                    "rgba(0, 0, 255, 0.8)",      // Deep Blue
+                    "rgba(255, 165, 0, 0.8)",    // Orange
+                    "rgba(128, 0, 0, 0.8)",      // Dark Red
+                    "rgba(0, 128, 0, 0.8)",      // Lime Green
+                    "rgba(255, 255, 0, 0.8)",    // Yellow
+                    "rgba(0, 255, 0, 0.8)",      // Bright Green
+                    "rgba(255, 0, 255, 0.8)"     // Magenta
+                ],
+                borderColor: [
+                    "rgba(255, 99, 132, 1)",
+                    "rgba(54, 162, 235, 1)",
+                    "rgba(255, 206, 86, 1)",
+                    "rgba(75, 192, 192, 1)",
+                    "rgba(153, 102, 255, 1)",
+                    "rgba(255, 159, 64, 1)",
+                    "rgba(0, 255, 255, 1)",    // Cyan
+                    "rgba(255, 192, 203, 1)",  // Pink
+                    "rgba(255, 0, 0, 1)",      // Bright Red
+                    "rgba(0, 0, 255, 1)",      // Deep Blue
+                    "rgba(255, 165, 0, 1)",    // Orange
+                    "rgba(128, 0, 0, 1)",      // Dark Red
+                    "rgba(0, 128, 0, 1)",      // Lime Green
+                    "rgba(255, 255, 0, 1)",    // Yellow
+                    "rgba(0, 255, 0, 1)",      // Bright Green
+                    "rgba(255, 0, 255, 1)"     // Magenta
+                ],
+                    hoverOffset: 25
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: 20 // Adjust the padding as needed
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 12,
+                                family: 'Arial',
+                            }, 
+                            color: '#6C9BCF'
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += new Intl.NumberFormat({ style: 'currency', currency: 'INR' }).format(context.parsed);
+                                }
+                                if (label) {
+                                    label += ' {{ selected_currency }}';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                elements: {
+                    arc: {
+                        borderWidth: 1,
+                        borderColor: 'white' 
+                    }
+                }
+            }
+        });
+    })
+    .catch(error => console.error('Error:', error));
+</script>
+
+<script>
+    var ctx = document.getElementById('expenseChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar', // Change the chart type to 'bar'
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: 'Monthly-Expenses Category Wise ({{ selected_currency }})',
+                data: {{ amounts|safe }},
+                backgroundColor: [ // Provide an array of colors for each bar
+                "rgba(255, 99, 132, 0.2)",
+                "rgba(54, 162, 235, 0.2)",
+                "rgba(255, 206, 86, 0.2)",
+                "rgba(75, 192, 192, 0.2)",
+                "rgba(153, 102, 255, 0.2)",
+                "rgba(255, 159, 64, 0.2)",
+                "rgba(0, 255, 255, 0.2)",    // Cyan
+                "rgba(255, 192, 203, 0.2)",  // Pink
+                "rgba(255, 0, 0, 0.2)",      // Bright Red
+                "rgba(0, 0, 255, 0.2)",      // Deep Blue
+                "rgba(255, 165, 0, 0.2)",    // Orange
+                "rgba(128, 0, 0, 0.2)",      // Dark Red
+                "rgba(0, 128, 0, 0.2)",      // Lime Green
+                "rgba(255, 255, 0, 0.2)",    // Yellow
+                "rgba(0, 255, 0, 0.2)",      // Bright Green
+                "rgba(255, 0, 255, 0.2)"     // Magenta
+                ],
+                borderColor: [ // Corresponding border colors for each bar
+                    "rgba(255, 99, 132, 1)",
+                    "rgba(54, 162, 235, 1)",
+                    "rgba(255, 206, 86, 1)",
+                    "rgba(75, 192, 192, 1)",
+                    "rgba(153, 102, 255, 1)",
+                    "rgba(255, 159, 64, 1)",
+                    "rgba(0, 255, 255, 1)",    // Cyan
+                    "rgba(255, 192, 203, 1)",  // Pink
+                    "rgba(255, 0, 0, 1)",      // Bright Red
+                    "rgba(0, 0, 255, 1)",      // Deep Blue
+                    "rgba(255, 165, 0, 1)",    // Orange
+                    "rgba(128, 0, 0, 1)",      // Dark Red
+                    "rgba(0, 128, 0, 1)",      // Lime Green
+                    "rgba(255, 255, 0, 1)",    // Yellow
+                    "rgba(0, 255, 0, 1)",      // Bright Green
+                    "rgba(255, 0, 255, 1)"     // Magenta
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 14 // Adjust the font size as needed
+                        },
+                        color: '#6C9BCF'
+                    }
+                }
+            },
+            plugins: {
+                // Change the font size of the labels
+                legend: {
+                    labels: {
+                        font: {
+                            size: 20, // Adjust the font size as needed
+                        },
+                        color: '#6C9BCF'
+                    }
+                }
+            }
+        }
+    });
+
+</script>
+
+<style>
+    form {
+        margin-bottom: 20px;
+        display: inline-flex;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 5px;
+        margin-top: 20px;
+    }
+    
+    input[type="date"] {
+        width: 30%;
+        padding: 8px;
+        margin-bottom: 10px;
+        margin-right: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        margin-top: 20px;
+    }
+    
+    input[type="submit"] {
+        width: 30%;
+        height: 43px;
+        margin-top: 15px;
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 56px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    input[type="submit"]:hover {
+        background-color: #45a049;
+    }
+
+    #downloadPdfBtn {
+        display: block;
+        width: 200px;
+        height: 40px;
+        margin-top: 20px;
+        margin-bottom: 100px;
+        background-color: #4CAF50;
+        color: white;
+        text-align: center;
+        border-radius: 10px;
+        padding: 10px;
+        transition: all 0.5s;
+        cursor: pointer;
+        font-size: 18px;
+    }
+    
+    #downloadPdfBtn:hover {
+        background-color: #45a049;
+    }
+    
+</style>
+
+
+
+<style>
+.chart-container {
+    left: 30%;
+    top: -40%;
+    width: 400px; /* Set to your preference */
+    height: 400px; /* Set to your preference */
+    margin: auto;
+    position: relative;
+}
+.chart-section{
+    {% comment %} display: none; {% endcomment %}
+    position: relative;
+}
+
+#expenseChart{
+    padding: 10px;
+    background-color: transparent;
+}
+
+#myChart {
+    padding: 10px;
+    background-color: transparent;
+}
+/* Regular mode styles */
+.chart-label {
+    color: var(--color-dark);
+}
+
+/* Dark mode styles */
+body.dark-mode .chart-label {
+    color: var(--color-white);
+}
+
+</style>
+
+
+<style>
+    .analysis-table {
+        width: 85%;
+        margin-top: 20px;
+        position: absolute;
+        top: 420px;
+    }
+
+    .analysis-table table {
+        border: 1px solid #ddd;
+        border-radius: 100px;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .analysis-table th,
+    .analysis-table td {
+        border: 3px solid #ddd;
+        font-size: larger;
+        border-radius: 10px;
+        padding: 8px;
+        text-align: center;
+    }
+
+    .analysis-table th {
+        background-color: #f2f2f2;
+    }
+
+    .analysis-table td {
+        width: 130px;
+    }
+
+    #table-title {
+        position: absolute;
+        top: 290px;
+        left: 426px;
+        width: 250px;
+        font-size: larger;
+        border: 3px solid #ddd;
+        border-radius: 10px;
+        padding: 8px;
+        text-align: center;
+    }
+
+</style>
+
+
+
+{% endblock %}

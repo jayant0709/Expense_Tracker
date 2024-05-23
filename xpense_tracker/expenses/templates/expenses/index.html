@@ -1,0 +1,638 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'expenses/style.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses/styles.css' %}">
+    <title>BudgetBuddy Dashboard</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+</head>
+
+<body class="{{ mode }}">
+
+    <div class="container">
+        <!-- Sidebar Section -->
+        <aside>
+            <div class="toggle">
+                <div class="close" id="close-btn">
+                    <span class="material-icons-sharp">
+                        close
+                    </span>
+                </div>
+            </div>
+
+            <div class="sidebar">
+
+                <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <span class="material-icons-sharp">
+                        dashboard
+                    </span>
+                    <h3>Dashboard</h3>
+                </a>
+
+                <a href="{% url 'analysis_page' %}">
+                    <span class="material-icons-sharp">
+                        bar_chart
+                    </span>
+                    <h3>Analyses</h3>
+                </a>
+
+                {% comment %} <a href="#">
+                    <span class="material-icons-sharp">
+                        flag
+                    </span>
+                    <h3>Set Goals</h3>
+                </a>
+                 {% endcomment %}
+                <a href="{% url 'transaction_page' %}">
+                    <span class="material-icons-sharp">
+                        receipt_long
+                    </span>
+                    <h3>Transaction History</h3>
+                </a>
+
+                {% comment %} <a href="#">
+                    <span class="material-icons-sharp">
+                        attach_money
+                        <!-- newspaper -->
+                    </span>
+                    <h3>Savings</h3>
+                </a> {% endcomment %}
+
+                <a href="{% url 'settings_page' %}">
+                    <span class="material-icons-sharp">
+                        person
+                    </span>
+                    <h3>Settings</h3>
+                </a>
+
+                <a href="{% url 'contact_page' %}">
+                    <span class="material-icons-sharp">
+                        phone
+                    </span>
+                    <h3>Contact Us</h3>
+                </a>
+                    
+                </a>
+                <a href="{% url 'login_page' %}">
+                    <span class="material-icons-sharp">
+                        logout
+                    </span>
+                    <h3>Logout</h3>
+                </a>
+                
+            </div>
+        </aside>
+        <!-- End of Sidebar Section -->
+
+        <!-- Main Content -->
+        <main>
+            <h1>Dashboard</h1>
+            <!-- Analyses start -->
+            <div class="analyse">
+                <div class="sales">
+                    <div class="status">
+                        <div class="info">
+                            <h3>Available Balance</h3>
+                            <h1>{{ available_balance }} {{ selected_currency }}</h1>
+                        </div>
+                        <div class="progresss">
+                            <svg>
+                                <circle cx="38" cy="38" r="36"></circle>
+                            </svg>
+                            <div class="percentage">
+                                <p>{{ available_balance_percentage }}%</p>
+                            </div>                            
+                        </div>
+                    </div>
+                </div>
+                <div class="visits">
+                    <div class="status">
+                        <div class="info">
+                            <h3>Expense</h3>
+                            <h1>{{ total_expense }} {{ selected_currency }}</h1>
+                        </div>
+                        <div class="progresss">
+                            <svg>
+                                <circle cx="38" cy="38" r="36"></circle>
+                            </svg>
+                            <div class="percentage">
+                                <p>{{ total_expense_percentage }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="searches">
+                    <div class="status">
+                        <div class="info">
+                            <h3>Income</h3>
+                            <h1>{{ current_income }} {{ selected_currency }}</h1>
+                        </div>
+                        <div class="progresss">
+                            <svg>
+                                <circle cx="38" cy="38" r="36"></circle>
+                            </svg>
+                            <div class="percentage">
+                                <p>+100%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Chart Section -->
+            <div class="chart-section">
+                <canvas id="expenseChart" style="width: 400px; height: 150px;"></canvas>
+            </div>
+        
+
+            <div id="addExpenseModal" class="modal">
+                <div class="modal-content">
+                    <span id="closeButton1" class="close">×</span>
+                    <h1>Add Expense</h1>
+                    <form id="expenseForm" method="post">
+                        {% csrf_token %}
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" required><br>
+                        <label for="category">Category:</label>
+                            <select id="category" name="category" required>
+                                <option value="">Choose Category</option>
+                                <option value="Food and Groceries">Food and Groceries</option>
+                                <option value="Housing">Housing</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Personal Care">Personal Care</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Clothing and Accessories">Clothing and Accessories</option>
+                                <option value="Education">Education</option>
+                                <option value="Other">Other</option>
+                            </select><br>
+                        <label for="date">Date:</label>
+                        <input type="date" id="date" name="date" required><br>
+                        <label for="amount">Amount:</label>
+                        <input type="number" id="amount" name="amount" required><br>
+                        <input id ="submitbtn" type="submit" value="Submit">
+                    </form>
+                </div>
+            </div>
+                        
+      
+      <button id="addExpenseBtn">Add Expense</button>
+
+      <!-- Add Income Modal -->
+        
+
+      <!-- Button trigger modal -->
+    <button id="addIncomeBtn">
+        Add Income
+    </button>
+
+    <!-- Modal -->
+    <div id="addIncomeModal" class="modal">
+        <div class="modal-content">
+            <span id="closeButton2" class="close">×</span>
+            <h1>Add Income</h1>
+            <form id="incomeForm" method="post">
+                {% csrf_token %}
+                <label for="amount">Income:</label>
+                <input type="text" id="amount" name="amount" required><br>
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required><br>
+                <input id ="submitbtn2" type="submit" value="Submit">
+            </form>                                   
+        </div>
+    </div>
+      
+
+      <a href="{% url 'dashboard' %}">
+        <img id="refresh-icon" src="{% static 'expenses/images/image.png' %}" alt="Description of the image">
+      </a>
+
+
+      {% comment %} all modal styles are added here {% endcomment %}
+      <style>
+
+        /* Styles of refresh logo */
+
+        #refresh-icon {
+            width: 50px; /* Set the width of the image */
+            position: relative;
+            left: 300px;
+            top: -50px;
+            transition: transform 0.5s;
+        }
+        #refresh-icon:hover {
+            transform: rotate(180deg); /* Rotate the image by 180 degrees */
+            cursor: pointer;
+        }
+
+        /* add expense button and it styles */
+        
+
+
+          /* Container for modal */
+          #addExpenseModal {
+              display: none;
+              position: fixed;
+              z-index: 1;
+              left: 0;
+              top: 0;
+              width: 100%;
+              height: 100%;
+              overflow: hidden;
+              background-color: rgba(0, 0, 0, 0.4);
+          }
+          #addIncomeModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+          
+          /* Modal content */
+          .modal-content {
+              background: rgba(255, 255, 255, 0.1); /* bluish transparent background */
+              margin: 10% auto;
+              padding: 20px;
+              border: none;
+              width: 50%;
+              border-radius: 10px;
+              color: white;
+              position: relative;
+              backdrop-filter: blur(10px); /* glassmorphic blur effect */
+          }
+          
+          /* Close button */
+          .close {
+              color: #fff;
+              float: right;
+              font-size: 28px;
+              font-weight: bold;
+          }
+          
+          .close:hover,
+          .close:focus {
+              color: #000;
+              text-decoration: none;
+              cursor: pointer;
+          }
+          
+          /* Form elements */
+          #expenseForm label,#incomeForm label {
+              color: white;
+              margin-bottom: 8px;
+              display: block;
+          }
+          
+          #expenseForm input[type="text"],#incomeForm input[type="text"],
+          #expenseForm input[type="number"],#incomeForm input[type="number"],
+          #expenseForm select,
+          #expenseForm input[type="date"],#incomeForm input[type="date"],
+          #expenseForm input[type="submit"],#incomeForm input[type="submit"] {
+              width: 100%;
+              padding: 10px;
+              margin: 6px 0;
+              border: none;
+              border-radius: 5px;
+              background: rgba(255, 255, 255, 0.3); /* transparent background */
+              color: black;
+              box-sizing: border-box;
+          }
+          
+          #expenseForm input[type="submit"],#incomeForm input[type="submit"] {
+              background-color: #8a2be2; /* bluish violet */
+              cursor: pointer;
+          }
+          
+          #expenseForm input[type="submit"]:hover,#incomeForm input[type="submit"]:hover {
+              background-color: #6a1c9a; /* darker shade */
+          }
+          
+          /* Payment message */
+          #paymentMessage {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              background-color: rgba(255, 255, 255, 0.7); /* semi-transparent background */
+              padding: 10px 20px;
+              border-radius: 5px;
+              color: #8a2be2; /* bluish violet */
+              font-weight: bold;
+              display: none;
+          }
+          
+          .hidden {
+              display: none;
+          }
+          
+          .show {
+              display: block;
+          }
+          
+          /* Add Expense button */
+          #addExpenseBtn,#addIncomeBtn {
+              background-color: #8a2be2; /* bluish violet */
+              color: white;
+              border: none;
+              margin-right: 200px;
+              padding: 10px 20px;
+              border-radius: 5px;
+              cursor: pointer;
+              font-size: 15px;
+              margin-top: 5%;
+          }
+          
+          #addExpenseBtn:hover {
+              background-color: #6a1c9a; /* darker shade */
+          }
+          
+      </style>
+            <script>
+                $(document).ready(function() {
+                    $('#expenseForm').submit(function(e) {
+                        e.preventDefault();  // Prevent the default form submission
+                        $.ajax({
+                            type: "POST",
+                            url: "{% url 'add_expense' %}",
+                            data: $(this).serialize(),
+                            success: function(response) {
+                                if (response.success) {
+                                    // Handle success (e.g., show a success message)
+                                    alert("Expense added successfully");
+                                    // Optionally, clear the form fields
+                                    $('#name').val('');
+                                    $('#category').val('');
+                                    $('#date').val('');
+                                    $('#amount').val('');
+                                    // Hide the modal
+                                    hideExpenseModal();
+                                } else {
+                                    // Handle error (e.g., display form errors)
+                                    alert("Error: " + response.errors);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                // Handle error (e.g., display error message)
+                                alert("There was an error. Please try again.");
+                            }
+                        });
+                    });
+                });
+                
+                // Function to show expense modal
+                function showExpenseModal() {
+                    document.getElementById('addExpenseModal').style.display = 'block';
+                }
+                
+                // Function to hide modal
+                function hideExpenseModal() {
+                    document.getElementById('addExpenseModal').style.display = 'none';
+                }
+                
+                // Event listener for Add Expense button
+                document.getElementById('addExpenseBtn').addEventListener('click', showExpenseModal);
+                
+                // Event listener for Close button
+                document.getElementById('closeButton1').addEventListener('click', hideExpenseModal);
+                
+                // Event listener for form submission
+                document.getElementById('expenseForm').addEventListener('submit', function(event) {
+                    event.preventDefault(); // Prevent default form submission
+                    // Form submission is handled by AJAX, no need for additional action here
+                });
+                                
+            </script>
+
+            <script>
+                $(document).ready(function() {
+                    $('#incomeForm').submit(function(e) {
+                        e.preventDefault();  // Prevent the default form submission
+                        $.ajax({
+                            type: "POST",
+                            url: "{% url 'add_income' %}",
+                            data: $(this).serialize(),
+                            success: function(response) {
+                                if (response.success) {
+                                    // Handle success (e.g., show a success message)
+                                    alert("Income added successfully");
+                                    // Optionally, clear the form fields
+                                    $('#Income').val('');
+                                    $('#date').val('');
+                                    // Hide the modal
+                                    hideIncomeModal();
+                                } else {
+                                    // Handle error by constructing a user-friendly error message
+                                    var errorMessage = "Error(s) occurred:";
+                                    for (var key in response.errors) {
+                                        if (response.errors.hasOwnProperty(key)) {
+                                            errorMessage += "\n- " + response.errors[key];
+                                        }
+                                    }
+                                    alert(errorMessage);
+                                }
+                                
+                            },
+                            error: function(xhr, status, error) {
+                                // Handle error by logging more details
+                                console.log(xhr);
+                                console.log(status);
+                                console.log(error);
+                                // Show a more descriptive error message to the user
+                                alert("There was an error. Please check the console for more details.");
+                            }
+                            
+                        });
+                    });
+                });
+                
+                // Function to show income modal
+                // Function to show income modal
+                function showIncomeModal() {
+                    document.getElementById('addIncomeModal').style.display = 'block';
+                    // Add event listener to the modal overlay to close the modal when clicked outside
+                    document.getElementById('addIncomeModal').addEventListener('click', function(event) {
+                        if (event.target === this) { // Check if the click occurred on the overlay itself
+                            hideIncomeModal(); // Close the modal
+                        }
+                    });
+                }
+
+                // Function to hide modal
+                function hideIncomeModal() {
+                    document.getElementById('addIncomeModal').style.display = 'none';
+                }
+
+                // Event listener for Add Income button
+                document.getElementById('addIncomeBtn').addEventListener('click', showIncomeModal);
+
+                // Event listener for Close button
+                document.getElementById('closeButton2').addEventListener('click', hideIncomeModal);
+
+                // Event listener for form submission
+                document.getElementById('incomeForm').addEventListener('submit', function(event) {
+                    event.preventDefault(); // Prevent default form submission
+                    // Form submission is handled by AJAX, no need for additional action here
+                });
+
+                
+            </script>
+            
+
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+            
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                var ctx = document.getElementById('expenseChart').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ labels|safe }},
+                        datasets: [{
+                            label: 'Expenses',
+                            data: {{ amounts|safe }},
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            </script>
+
+
+
+            <script src="{% static "expenses/script.js" %}"></script>
+
+
+        </main>
+        <!-- End of Main Content -->
+
+        <!-- Right Section -->
+        <div class="right-section">
+            <div class="nav">
+                <button id="menu-btn">
+                    <span class="material-icons-sharp">
+                        menu
+                    </span>
+                </button>
+                <div class="dark-mode">
+                    <span class="material-icons-sharp active">
+                        light_mode
+                    </span>
+                    <span class="material-icons-sharp">
+                        dark_mode
+                    </span>
+                </div>
+
+                <div class="profile">
+                    <div class="mt-4 mt-lg-0 me-lg-n4 py-3 px-4 bg-primary d-flex align-items-center">
+                        <div class="user-info">
+                            <p class="mb-1 text-white">Username:</p>
+                            {% if username %}
+                                <h5 class="mb-1 text-white"><strong>{{ username }}</strong></h5>
+                            {% else %}
+                                <h5 class="mb-1 text-white">Not logged in</h5>
+                            {% endif %}
+                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End of Nav -->
+
+            <div class="user-profile">
+                <div class="logo">
+                    {% comment %} <img src="{% static 'images/Down_logo_new.jpg' %}"> {% endcomment %}
+                    <h2>BudgetBuddy</h2>
+                    <p>Your own Finance Management</p>
+                </div>
+            </div>
+
+            <div class="reminders">
+                <div class="header">
+                    <h2>Reminders</h2>
+                    <span class="material-icons-sharp">
+                        notifications_none
+                    </span>
+                </div>
+
+                <div class="notification" id="notificationContainer">
+                    <div class="icon">
+                        <span class="material-icons-sharp">
+                            volume_up
+                        </span>
+                    </div>
+                    <div class="content">
+                        <div class="info">
+                            <h3>Workshop</h3>
+                            <small class="text_muted">
+                                08:00 AM - 12:00 PM
+                            </small>
+                        </div>
+                        <span class="material-icons-sharp">
+                            more_vert
+                        </span>
+                    </div>
+                </div>
+
+                <div class="notification deactive">
+                    <div class="icon">
+                        <span class="material-icons-sharp">
+                            edit
+                        </span>
+                    </div>
+                    <div class="content">
+                        <div class="info">
+                            <h3>Workshop</h3>
+                            <small class="text_muted">
+                                08:00 AM - 12:00 PM
+                            </small>
+                        </div>
+                        <span class="material-icons-sharp">
+                            more_vert
+                        </span>
+                    </div>
+                </div>
+
+                <div class="notification add-reminder" id="addReminder">
+                    <div>
+                        <span class="material-icons-sharp">
+                            add
+                        </span>
+                        <h3>Add Reminder</h3>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+    <script src="{% static 'static/expenses/dark-mode.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'index.js' %}"></script>
+</body>
+
+</html>

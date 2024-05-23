@@ -1,0 +1,272 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'expenses/style.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses/styles.css' %}">
+    <title>BudgetBuddy Dashboard</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,900" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <div class="container">
+        <!-- Sidebar Section -->
+        <aside>
+            <div class="toggle">
+                <div class="close" id="close-btn">
+                    <span class="material-icons-sharp">
+                        close
+                    </span>
+                </div>
+            </div>
+
+            <div class="sidebar">
+
+                <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <span class="material-icons-sharp">
+                        dashboard
+                    </span>
+                    <h3>Dashboard</h3>
+                </a>
+
+                <a href="{% url 'analysis_page' %}" class="{% if request.resolver_match.url_name == 'analysis_page' %}active{% endif %}">
+                    <span class="material-icons-sharp">
+                        bar_chart
+                    </span>
+                    <h3>Analyses</h3>
+                </a>
+
+                {% comment %} <a href="#" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <span class="material-icons-sharp">
+                        flag
+                    </span>
+                    <h3>Set Goals</h3>
+                </a> {% endcomment %}
+                
+                <a href="{% url 'transaction_page' %}" class="{% if request.resolver_match.url_name == 'transaction_page' %}active{% endif %}">
+                    <span class="material-icons-sharp">
+                        receipt_long
+                    </span>
+                    <h3>Transaction History</h3>
+                </a>
+
+                {% comment %} <a href="#" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <span class="material-icons-sharp">
+                        attach_money
+                        <!-- newspaper -->
+                    </span>
+                    <h3>Savings</h3>
+                </a> {% endcomment %}
+
+                <a href="{% url 'settings_page' %}" class="{% if request.resolver_match.url_name == 'settings_page' %}active{% endif %}">
+                    <span class="material-icons-sharp">
+                        person
+                    </span>
+                    <h3>Settings</h3>
+                </a>
+
+                <a href="{% url 'contact_page' %}" class="{% if request.resolver_match.url_name == 'contact_page' %}active{% endif %}">
+                    <span class="material-icons-sharp">
+                        phone
+                    </span>
+                    <h3>Contact Us</h3>
+                </a>
+                    
+                </a>
+                <a href="{% url 'login_page' %}">
+                    <span class="material-icons-sharp">
+                        logout
+                    </span>
+                    <h3>Logout</h3>
+                </a>
+            </div>
+        </aside>
+        <!-- End of Sidebar Section -->
+
+        <!-- Main Content -->
+        <main>
+            {% comment %} <h1>Dashboard</h1>
+            <!-- Analyses start -->
+            <div class="analyse">
+                <div class="sales">
+                    <div class="status">
+                        <div class="info">
+                            <h3>Available Balance</h3>
+                            <h1>7,160  Rs</h1>
+                        </div>
+                        <div class="progresss">
+                            <svg>
+                                <circle cx="38" cy="38" r="36"></circle>
+                            </svg>
+                            <div class="percentage">
+                                <p>+71.6%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="visits">
+                    <div class="status">
+                        <div class="info">
+                            <h3>Expense</h3>
+                            <h1>2,840  Rs</h1>
+                        </div>
+                        <div class="progresss">
+                            <svg>
+                                <circle cx="38" cy="38" r="36"></circle>
+                            </svg>
+                            <div class="percentage">
+                                <p>-28.4%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="searches">
+                    <div class="status">
+                        <div class="info">
+                            <h3>Income</h3>
+                            <h1>10,000 Rs</h1>
+                        </div>
+                        <div class="progresss">
+                            <svg>
+                                <circle cx="38" cy="38" r="36"></circle>
+                            </svg>
+                            <div class="percentage">
+                                <p>+100%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> {% endcomment %}
+            
+            {% comment %} <!-- Chart Section -->
+            <div class="chart-section">
+                <!-- <h2>Chart Section</h2> -->
+                <canvas id="myChart"  height="100"></canvas>
+            </div> {% endcomment %}
+
+            {% block content %}
+            {% endblock %}
+            {% block content_2 %}
+            {% endblock %}
+
+        </main>
+        <!-- End of Main Content -->
+
+        <!-- Right Section -->
+        <div class="right-section">
+            <div class="nav">
+                <button id="menu-btn">
+                    <span class="material-icons-sharp">
+                        menu
+                    </span>
+                </button>
+                <div class="dark-mode">
+                    <span class="material-icons-sharp active">
+                        light_mode
+                    </span>
+                    <span class="material-icons-sharp">
+                        dark_mode
+                    </span>
+                </div>
+
+                <div class="profile">
+                    <div class="mt-4 mt-lg-0 me-lg-n4 py-3 px-4 bg-primary d-flex align-items-center">
+                        <div class="user-info">
+                            <p class="mb-1 text-white">Username:</p>
+                            {% if username %}
+                                <h5 class="mb-1 text-white"><strong>{{ username }}</strong></h5>
+                            {% else %}
+                                <h5 class="mb-1 text-white">Not logged in</h5>
+                            {% endif %}
+                        
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- End of Nav -->
+
+            {% comment %} <div class="user-profile">
+                <div class="logo">
+                    <img src="{% static 'images/Down_logo_new.jpg' %}">
+                    <h2>BudgetBuddy</h2>
+                    <p>Your own Finance Management</p>
+                </div>
+            </div> {% endcomment %}
+
+            <div class="reminders">
+                <div class="header">
+                    <h2>Reminders</h2>
+                    <span class="material-icons-sharp">
+                        notifications_none
+                    </span>
+                </div>
+
+                <div class="notification" id="notificationContainer">
+                    <div class="icon">
+                        <span class="material-icons-sharp">
+                            volume_up
+                        </span>
+                    </div>
+                    <div class="content">
+                        <div class="info">
+                            <h3>Workshop</h3>
+                            <small class="text_muted">
+                                08:00 AM - 12:00 PM
+                            </small>
+                        </div>
+                        <span class="material-icons-sharp">
+                            more_vert
+                        </span>
+                    </div>
+                </div>
+
+                <div class="notification deactive">
+                    <div class="icon">
+                        <span class="material-icons-sharp">
+                            edit
+                        </span>
+                    </div>
+                    <div class="content">
+                        <div class="info">
+                            <h3>Workshop</h3>
+                            <small class="text_muted">
+                                08:00 AM - 12:00 PM
+                            </small>
+                        </div>
+                        <span class="material-icons-sharp">
+                            more_vert
+                        </span>
+                    </div>
+                </div>
+
+                <div class="notification add-reminder" id="addReminder">
+                    <div>
+                        <span class="material-icons-sharp">
+                            add
+                        </span>
+                        <h3>Add Reminder</h3>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-piechart-outlabels"></script>
+    <script src="{% static 'index.js' %}"></script>
+</body>
+
+</html>

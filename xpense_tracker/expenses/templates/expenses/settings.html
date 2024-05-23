@@ -1,0 +1,262 @@
+{% extends "expenses/base.html" %}
+
+{% block content %}
+<div id="blocks">
+    <div id="block1" class="block">
+        <p>Change Currency</p>
+        <form action="{% url 'settings_page' %}" method="post">
+            {% csrf_token %}
+            <div class="currency">
+                <select name="currency">
+                    <option value="NA" {% if selected_currency == "NA" %} selected {% endif %}>Choose</option>
+                    <option value="INR" {% if selected_currency == "INR" %} selected {% endif %}>Indian Rupee (INR)</option>
+                    <option value="USD" {% if selected_currency == "USD" %} selected {% endif %}>United States Dollar (USD)</option>
+                    <option value="EUR" {% if selected_currency == "EUR" %} selected {% endif %}>Euro (EUR)</option>
+                    <option value="JPY" {% if selected_currency == "JPY" %} selected {% endif %}>Japanese Yen (JPY)</option>
+                    <option value="GBP" {% if selected_currency == "GBP" %} selected {% endif %}>British Pound Sterling (GBP)</option>
+                    <option value="AUD" {% if selected_currency == "AUD" %} selected {% endif %}>Australian Dollar (AUD)</option>
+                    <option value="CAD" {% if selected_currency == "CAD" %} selected {% endif %}>Canadian Dollar (CAD)</option>
+                    <option value="CHF" {% if selected_currency == "CHF" %} selected {% endif %}>Swiss Franc (CHF)</option>
+                    <option value="CNY" {% if selected_currency == "CNY" %} selected {% endif %}>Chinese Yuan (CNY)</option>
+                    <option value="SEK" {% if selected_currency == "SEK" %} selected {% endif %}>Swedish Krona (SEK)</option>
+                    <option value="NZD" {% if selected_currency == "NZD" %} selected {% endif %}>New Zealand Dollar (NZD)</option>
+                </select>
+            </div>
+            <button id="currency_btn" type="submit">Save Settings</button>
+        </form>
+        
+    </div>
+    <div id="block2" class="block">
+        <p>Manage Account</p>
+        <div id="Delete" class="tab-content delete-container" style="display:block;">
+            <form method="post" action="{% url 'remove_user' %}" id="delete-account-form" class="delete-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="delete-username" class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" id="delete-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="delete-password" class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" id="delete-password" required>
+                </div>
+                <button type="submit" id="deleteBtn" class="btn btn-danger delete-account-btn">Delete My Account</button>
+            </form>
+        </div>
+    </div>
+</div>
+  
+<style>
+
+    /* settings tabs */
+    .block p{
+        position: absolute;
+        margin-left: 3%;
+        font-size: larger;
+        font-weight: bold;
+        font-family: 'Quicksand', sans-serif;
+        color: white;
+    }
+    #blocks {
+        position: relative; /* Set the container to relative positioning */
+        height: 110px; /* Adjust container height to accommodate both blocks */
+    }
+    
+    #block1, #block2 {
+        display: flex;
+        justify-content: center; /* Horizontal centering */
+        align-items: center;
+        height: 50px;
+        width: 100%;
+        background-color: rgb(43, 48, 43);
+        border-radius: 20px;
+        margin-top: 5%;
+        margin-bottom: 5%;
+        box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.5);
+        transition: box-shadow 0.5s ease;
+    }
+
+    #block1:hover, #block2:hover {
+        background-color: rgb(83, 92, 83);
+        border: 2px solid red;
+        box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.5);
+        cursor: pointer;
+    }
+    
+    #block1 {
+        top: 0; /* Position the first block at the top of the container */
+    }
+    
+    #block2 {
+        bottom: 0; /* Position the second block at the bottom of the container */
+    }
+    
+
+    /* Style the form itself */
+form {
+  max-width: 300px;
+  margin-top: 250px;
+  padding: 20px;
+  border: 3px solid #ddd;
+  border-radius: 20px;
+  background: rgba(138, 43, 226, 0.2); /* Bluish violet color */
+}
+
+/* Style the dropdown */
+.currency select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+}
+
+/* Style the submit button */
+#currency_btn{
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: #5c6bc0;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+#currency_btn:hover {
+  background-color: #3f51b5;
+}
+
+/* Style the selected currency text */
+h2 {
+  text-align: center;
+  color: grey;
+}
+
+/* Add some space above the h3 for better layout */
+form + h3 {
+  margin-top: 20px;
+}
+
+</style>
+  
+
+<style>
+    {% comment %} hide remainders div here {% endcomment %}
+
+    .reminders {
+        display: none;
+    }
+
+    
+    .delete-form {
+        background: rgba(138, 43, 226, 0.2); /* Bluish violet color */
+        margin-top: 120%;
+        padding: 20px;
+        border: none;
+        width: 100%;
+        border: 3px solid #ddd;
+        border-radius: 10px;
+        color: white;
+        position: relative;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+
+    #deleteBtn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #fff;
+        transition: background-color 0.3s ease;
+    }
+
+    #deleteBtn:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+</style>
+
+<script>
+
+    $(document).ready(function() {
+        // Initially hide the forms
+        $("#block1 form, #block2 form").hide();
+    
+        // Show form and push down the other block when block1 is clicked
+        $("#block1").click(function() {
+            // Adjust the margin of the other block first
+            $("#block2").animate({marginTop: ($("#block1 form").is(":visible") ? "5%" : "25%")}, function() {
+                // Then toggle the form after the animation completes
+                $("#block1 form").slideToggle();
+            });
+        });
+    
+        // Show form and push down the other block when block2 is clicked
+        $("#block2").click(function() {
+            // The comment tag of the commented part should be removed if new block is added below block 2
+            {% comment %} $("#block1").animate({marginBottom: ($("#block2 form").is(":visible") ? "5%" : "0%")}, function() {
+                $("#block2 form").slideToggle();
+            }); {% endcomment %}
+
+            $("#block2 form").slideToggle();
+        });
+    
+        // Stop propagation of click event from form to block
+        $("#block1 form, #block2 form").click(function(event) {
+            event.stopPropagation();
+        });
+    });
+    
+    
+    
+
+
+    $(document).ready(function() {
+        $("#delete-account-form").submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'remove_user' %}",
+                data: {
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    username: $("#delete-username").val(),
+                    password: $("#delete-password").val()
+                },
+                success: function(response) {
+                    alert(response.message);
+                    if(response.success) {
+                        window.location.href = "{% url 'login_page' %}";
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

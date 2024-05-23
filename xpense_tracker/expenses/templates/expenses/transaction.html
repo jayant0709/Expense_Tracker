@@ -1,0 +1,285 @@
+{% extends "expenses/base.html" %}
+
+{% block content %}
+{% load static %}
+
+    <main>
+        <h1>Transaction's History</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search..." class="small" onkeydown="searchTransactions(event)">
+            <select id="searchOption">
+                <option value="date">Date</option>
+                <option value="category">Category</option>
+                <option value="name">Name</option>
+                <option value="amount">Amount</option>
+            </select>
+        </div>
+        <table id="transactionsTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Name</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.date }}</td>
+                    <td>{{ transaction.category }}</td>
+                    <td>{{ transaction.name }}</td>
+                    <td>{{ transaction.amount }} {{ selected_currency }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No transactions found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            
+            
+            
+        </table>
+        <button id="readMoreButton" onclick="toggleTransactions()">Read More</button>
+    </main>
+
+    <style>
+        :root {
+            --color-background-light: #fff;
+            --color-background-dark: #181a1e;
+            --color-text-light: #333;
+            --color-text-dark: #edeffd;
+            --color-border-light: #ddd;
+            --color-border-dark: #333;
+        }
+        
+        /* Light Mode */
+        .light-mode {
+            --color-background: var(--color-background-light);
+            --color-text: var(--color-text-light);
+            --color-border: var(--color-border-light);
+            --color-table-border: #333; /* Dark color for table borders in light mode */
+        }
+        
+        /* Dark Mode */
+        .dark-mode {
+            --color-background: var(--color-background-dark);
+            --color-text: var(--color-text-dark);
+            --color-border: var(--color-border-dark);
+            --color-table-border: #fff; /* Light color for table borders in dark mode */
+        }
+        
+        #searchInput {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 6px rgba(167, 239, 249, 0.3); /* Add shadow */
+            border: 1px solid var(--color-border); /* Use color border variable */
+            width = 100px;
+        }
+        
+        #searchOption {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 6px rgba(166, 239, 248, 0.3); /* Add shadow */
+            border: 1px solid var(--color-border); /* Use color border variable */
+            width = 100px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--color-text); /* Use color text variable */
+            font-family: Arial, sans-serif;
+            font-size: 24px; /* Increased font size */
+        }
+        
+        input[type="text"] {
+            font-size: large;
+            width: 80%;
+            padding: 10px 30px 10px 10px; 
+            margin-bottom: 10px;
+            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+            position: relative; 
+            border: none; /* Remove default input border */
+            border-radius: 10px;
+        }
+        
+        
+        input[type="text"]::after {
+            content: "\1F50D"; 
+            /* font-family: 'Arial'; */
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #888; 
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+        }
+        
+        button {
+            width: 100%;
+            padding: 10px 20px;
+            background-color: #4CAF50; 
+            font-family: Arial, sans-serif;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px; /* Add margin below the table */
+            font-size: 16px; /* Increased font size */
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+        }
+        
+        {% comment %} table, th, td {
+            border: 1px solid var(--color-table-border); /* Use color table border variable */
+        } {% endcomment %}
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        select {
+            padding: 8px;
+            width: 19%; 
+            box-sizing: border-box;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        
+        tr.hidden {
+            display: none;
+        }
+        
+        tr:not(.hidden):hover {
+            background-color: #f9f9f9; 
+        }
+        
+        tr:last-child td {
+            border-bottom: 1px solid var(--color-table-border); /* Use color table border variable */
+        }
+        
+    </style>
+
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- <script src="{% static 'orders.js' %}"></script> -->
+    <script src="{% static 'index.js' %}"></script>
+
+    <script>
+            
+        function searchTransactions(event) {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toLowerCase(); // Convert filter to lowercase
+            var option = document.getElementById("searchOption").value;
+            table = document.getElementById("transactionsTable");
+            tr = table.getElementsByTagName("tr");
+        
+            var suggestions = []; // Array to store search suggestions
+        
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[getOptionIndex(option)];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (option === "amount" && getAmount(txtValue) === parseInt(filter)) {
+                        tr[i].style.display = "";
+                        suggestions.push(txtValue); // Add suggestion
+                    } else if (option !== "amount" && txtValue.toLowerCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                        suggestions.push(txtValue); // Add suggestion
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        
+            // Display search suggestions
+            showSuggestions(suggestions);
+        }
+        
+        function getAmount(amountString) {
+            // Extract the numeric part of the amount string
+            return parseInt(amountString.match(/\d+/)[0]);
+        }
+        
+        function showSuggestions(suggestions) {
+            var suggestionsList = document.getElementById("suggestionsList");
+            suggestionsList.innerHTML = ""; // Clear previous suggestions
+            suggestions.forEach(function(suggestion) {
+                var li = document.createElement("li");
+                li.textContent = suggestion;
+                suggestionsList.appendChild(li);
+            });
+        }
+        
+        function getOptionIndex(option) {
+            switch (option) {
+                case "date":
+                    return 0;
+                case "category":
+                    return 1;
+                case "name":
+                    return 2;
+                case "amount":
+                    return 3;
+                default:
+                    return 0;
+            }
+        }
+        
+        var numRowsDisplayed = 10;
+        var isShowingAll = false;
+        
+        function toggleTransactions() {
+          var tableRows = document.querySelectorAll('#transactionsTable tbody tr');
+          isShowingAll = !isShowingAll;
+          for (var i = numRowsDisplayed; i < tableRows.length; i++) {
+            tableRows[i].classList.toggle('hidden', !isShowingAll);
+          }
+          document.getElementById('readMoreButton').innerText = isShowingAll ? 'Show Less' : 'Read More';
+        }
+        
+        // Call toggleTransactions initially
+        toggleTransactions();
+        
+        // Call toggleTransactions again to ensure only 10 entries are visible initially
+        toggleTransactions();
+
+
+        // JavaScript to toggle dark and light mode
+        function toggleDarkMode() {
+            const body = document.body;
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+            } else {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+            }
+        }
+
+        // Set default mode to light mode
+        function setInitialTheme() {
+            document.body.classList.add('light-mode');
+        }
+
+        // Call setInitialTheme when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkModeToggle = document.querySelector('.dark-mode');
+            darkModeToggle.addEventListener('click', toggleDarkMode);
+        });
+         
+    </script>
+
+
+{% endblock %}

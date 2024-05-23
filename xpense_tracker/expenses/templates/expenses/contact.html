@@ -1,0 +1,83 @@
+{% extends "expenses/base.html" %}
+
+{% load static %}
+
+{% block content %}
+<title>Contact Us Section </title>
+<div class="contact-section">
+    <h2>Contact Us</h2>
+    <div class="border"></div>
+    <form class="contact-form" action="{% url 'contact_page' %}" method="post">
+        {% csrf_token %}
+        <input type="text" class="contact-form-text" placeholder="Your Name" name="name">
+        <input type="email" class="contact-form-text" placeholder="Your Email" name="email">
+        <input type="text" class="contact-form-text" placeholder="Your Phone" name="phone">
+        <textarea class="contact-form-text" placeholder="Your Message" name="message"></textarea>
+        <input type="submit" class="contact-form-btn" value="Send">
+    </form>    
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Montserrat', sans-serif;
+    }
+    .contact-section {
+        padding: 40px 0;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        max-width: 600px;
+        margin-top: 100px ;
+        margin-left: 200px;
+    }
+    .contact-section h2 {
+        text-align: center;
+        color: white;
+    }
+    .border {
+        width: 100px;
+        height: 5px;
+        background: #01a3a4;
+        margin: 30px auto;
+        border-radius: 5px;
+    }
+    .contact-form {
+        padding: 0 20px;
+    }
+    .contact-form-text {
+        width: calc(100% - 40px);
+        display: block;
+        box-sizing: border-box;
+        margin: 16px auto;
+        border: 1px solid #ccc;
+        background: #f9f9f9;
+        padding: 12px;
+        color: #333;
+        outline: none;
+        border-radius: 5px;
+        transition: border-color 0.3s;
+    }
+    .contact-form-text:focus {
+        border-color: #01a3a4;
+    }
+    textarea.contact-form-text {
+        height: 120px;
+    }
+    .contact-form-btn {
+        width: 100%;
+        border: 0;
+        background: #01a3a4;
+        padding: 12px;
+        color: #fff;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background 0.3s;
+    }
+    .contact-form-btn:hover {
+        background: #018282;
+    }
+</style>
+{% endblock %}
